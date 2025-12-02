@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Pomodoro</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Pomodoro Timer</h1>
+  <div id="timer">25:00</div>
+  <button id="startBtn">Start</button>
+
+  <script>
+const timerDisplay = document.getElementById('timer');
+const startBtn = document.getElementById('startBtn');
+const body = document.body;
+
+let workTime = 25 * 60;
+let restTime = 5 * 60;
+let timeLeft = workTime;
+let isWorking = true;
+let interval = null;
+let isPaused = false;
+
+function updateDisplay() {
+  const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+  const seconds = (timeLeft % 60).toString().padStart(2, '0');
+  timerDisplay.textContent = `${minutes}:${seconds}`;
+}
+
+function startTimer() {
+  if (interval) return;
+
+  interval = setInterval(() => {
+    if (!isPaused) {
+      timeLeft--;
+      updateDisplay();
+
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        interval = null;
+
+        if (isWorking) {
+          alert('Work session complete! Take a 5-minute break.');
+          isWorking = false;
+          timeLeft = restTime;
+        } else {
+          alert('Break finished! Time to work again.');
+          isWorking = true;
+          timeLeft = workTime;
+        }
+
+        updateDisplay();
+        startBtn.textContent = "Start";
+        body.classList.remove('running'); // back to paused/light mode
+      }
+    }
+  }, 1000);
+}
+
+startBtn.addEventListener('click', () => {
+  if (!interval) {
+    // timer not running ..start session
+    isPaused = false;
+    startBtn.textContent = "Pause";
+    body.classList.add('running'); // dark mode / running
+    startTimer();
+  } else if (!isPaused) {
+    // timer running ..pause
+    isPaused = true;
+    startBtn.textContent = "Continue";
+    body.classList.remove('running'); // light mode / paused
+  } else {
+    // timer paused ..continue
+    isPaused = false;
+    startBtn.textContent = "Pause";
+    body.classList.add('running'); // dark mode / running
+  }
+});
+</script>
+
